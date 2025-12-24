@@ -1,0 +1,12 @@
+# Python 相关
+__pycache__/
+code/__pycache__/
+
+# 数据文件
+video/
+
+# IDE 配置
+.idea/
+.vscode/
+*.swp
+*.swo
