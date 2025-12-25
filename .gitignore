@@ -4,6 +4,7 @@ code/__pycache__/
 
 # 数据文件
 video/
+code/pic/
 
 # IDE 配置
 .idea/
