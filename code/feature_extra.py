@@ -32,13 +32,13 @@ def preprocess_image(image_path):
 
 
 # ------------------- 图片特征提取 ----------------------------
-def extract_color_histogram(img, block_rows=2, block_cols=2):
+def extract_color_histogram(img, block_rows=4, block_cols=4):
     """
     分块提取HSV颜色直方图+颜色矩
     :param img: OpenCV读取的BGR图像（350x350）
     :param block_rows: 纵向分块数
     :param block_cols: 横向分块数
-    :return: 分块后的颜色特征（116维）
+    :return: 分块后的颜色特征（464维）
     """
     # 转HSV空间
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -81,7 +81,7 @@ def extract_color_histogram(img, block_rows=2, block_cols=2):
             block_feature = np.hstack([hist_h, hist_s, hist_v, color_moments])
             all_block_features.append(block_feature)
 
-    # 拼接所有块（2x2块 → 4×29=116维）
+    # 拼接所有块（4x4块 → 16×29=464维）
     final_feature = np.hstack(all_block_features)
     return final_feature
 
@@ -122,7 +122,7 @@ def extract_hog_feature(img, block_rows=4, block_cols=4):
             block_hog = block_hog[:128]
             all_block_hog.append(block_hog)
 
-    # 拼接所有宏观块的HOG特征（4×4×128=512维）
+    # 拼接所有宏观块的HOG特征（4×4×128=2048维）
     final_hog = np.hstack(all_block_hog)
     return final_hog
 

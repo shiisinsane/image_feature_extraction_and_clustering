@@ -32,7 +32,6 @@ def evaluate_cluster_vs_original(result_df, results_file_path, cluster_col="clus
     original_labels = result_df[label_col].values
 
     # 2. 基础统计
-    print(f"原始类别数量: {len(np.unique(original_labels))}")
     print(f"聚类簇数量: {len(np.unique(cluster_labels))}")
     print(f"原始类别分布:")
     original_counts = pd.Series(original_labels).value_counts().sort_index()
@@ -245,6 +244,64 @@ def analyze_cluster_result(result_df, result_file_path):
     return brand_cluster, category_cluster
 
 
+import seaborn as sns
+
+
+def analyze_cluster_feature_distribution(result_df, feature_cols, feature_groups, n_top_features=5):
+    """
+    分析每个簇的特征分布，识别标志性特征
+    :param result_df: 包含聚类结果和特征的DataFrame
+    :param feature_cols: 特征列名列表
+    :param feature_groups: 特征分组字典（键：分组名，值：该组包含的特征列名）
+    :param n_top_features: 每个簇需要展示的top特征数量
+    :return: 各簇的特征均值字典
+    """
+    print("\n=== 各簇特征分布分析 ===")
+    cluster_ids = sorted(result_df["clustering"].unique())
+    cluster_feature_means = {}  # 存储每个簇的特征均值
+
+    # 1. 计算每个簇的特征均值
+    for cluster_id in cluster_ids:
+        cluster_data = result_df[result_df["clustering"] == cluster_id]
+        # 提取特征列并计算均值
+        feature_means = cluster_data[feature_cols].mean().to_dict()
+        cluster_feature_means[cluster_id] = feature_means
+        print(f"\n--- 簇{cluster_id}的特征均值（前{n_top_features}个关键特征） ---")
+
+        # 按均值排序，取top特征（可根据特征分组筛选）
+        sorted_features = sorted(feature_means.items(), key=lambda x: x[1], reverse=True)
+        for col, mean in sorted_features[:n_top_features]:
+            # 找到特征所属分组
+            group_name = [k for k, v in feature_groups.items() if col in v][0]
+            print(f"  {group_name} - {col}: {mean:.4f}")
+
+    # 2. 可视化关键特征组的簇间差异（以颜色、纹理、形状为例）
+    for group_name, group_cols in feature_groups.items():
+        if len(group_cols) == 0:
+            continue
+        # 计算每个簇在该组特征上的平均均值（简化高维特征）
+        group_means = []
+        for cluster_id in cluster_ids:
+            # 取该组所有特征的均值作为组代表值
+            group_mean = np.mean([cluster_feature_means[cluster_id][col] for col in group_cols])
+            group_means.append(group_mean)
+
+        # 绘制条形图
+        plt.figure(figsize=(10, 6))
+        sns.barplot(x=cluster_ids, y=group_means)
+        plt.title(f"各簇在[{group_name}]特征上的平均表现", fontsize=12)
+        plt.xlabel("聚类簇ID")
+        plt.ylabel(f"{group_name}特征均值（越高越显著）")
+        plt.xticks(cluster_ids)
+        plt.tight_layout()
+        save_path = f'D:/杨谊瑶/大三上/大数据技术/第三次上机/img_feature_clustering/files/{RESULTS_FILE_PATH}/{group_name}_cluster_comparison.png'
+        plt.savefig(save_path, dpi=300)
+        plt.show()
+
+    return cluster_feature_means
+
+
+
 if __name__ == "__main__":
     # 传统方法
     RESULTS_FILE_PATH = "Tradition_results"
@@ -278,7 +335,25 @@ if __name__ == "__main__":
         RESULTS_FILE_PATH,
         cluster_col="clustering",
         label_col="brand",
+        #label_col="product_category", # 启用这个评价标准时，要同时修改K-Means聚类数为7
     )
+
+    # 传统特征分组：特征描述，不同类别的产品具有怎样的特征
+    if RESULTS_FILE_PATH == "Tradition_results":
+        feature_groups = {
+            "颜色特征（HSV直方图+颜色矩）": feature_cols[:464],  # 对应extract_color_histogram的464维
+            "形状特征（HOG）": feature_cols[464:464 + 2048],  # 对应extract_hog_feature的2048维
+            "纹理特征（LBP）": feature_cols[464 + 2048:464 + 2048 + 944],  # 对应extract_lbp_feature的944维
+            "局部特征（SIFT）": feature_cols[464 + 2048 + 944:464 + 2048 + 944 + 2048],  # 对应extract_sift_feature的2048维
+        }
+        # 分析各簇的特征分布
+        cluster_feature_means = analyze_cluster_feature_distribution(
+            result_df,
+            feature_cols,
+            feature_groups,
+            n_top_features=5  # 每个簇展示top5显著特征
+        )
+
 
     # 聚类分析报告
     report_path = f"D:/杨谊瑶/大三上/大数据技术/第三次上机/img_feature_clustering/files/{RESULTS_FILE_PATH}/kmeans_clustering_report.txt"
@@ -299,7 +374,6 @@ if __name__ == "__main__":
         for cluster_id, count in cluster_counts.items():
             f.write(f"   - 簇{cluster_id + 1}: {count}个样本 ({count / len(result_df) * 100:.1f}%)\n")
         f.write(f"\n4. 聚类与原始类别标签一致性评估:\n")
-        f.write(f"   - 原始类别数量: {len(np.unique(result_df['product_category']))}\n")
         for metric_name, value in eval_metrics.items():
             f.write(f"   - {metric_name}: {value:.4f}\n")
         f.write(f"\n5. 聚类结果文件说明:\n")

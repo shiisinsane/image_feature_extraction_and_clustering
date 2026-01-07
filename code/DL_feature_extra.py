@@ -351,13 +351,13 @@ if __name__ == "__main__":
     if result_df_aug is not None:
         save_deep_features(result_df_aug, "D:/杨谊瑶/大三上/大数据技术/第三次上机/img_feature_clustering/files/DL_results/deep_features_augmented.csv")
 
-    # 选项3: 使用混合特征
-    print("\n=== 3: 使用混合特征 ===")
-    result_df_hybrid, feature_matrix_hybrid = batch_extract_deep_features(
-        PIC_FOLDER,
-        use_hybrid=True,
-        use_augmentation=False
-    )
-
-    if result_df_hybrid is not None:
-        save_deep_features(result_df_hybrid, "D:/杨谊瑶/大三上/大数据技术/第三次上机/img_feature_clustering/files/DL_results/hybrid_features.csv")
+    # # 选项3: 使用混合特征
+    # print("\n=== 3: 使用混合特征 ===")
+    # result_df_hybrid, feature_matrix_hybrid = batch_extract_deep_features(
+    #     PIC_FOLDER,
+    #     use_hybrid=True,
+    #     use_augmentation=False
+    # )
+    #
+    # if result_df_hybrid is not None:
+    #     save_deep_features(result_df_hybrid, "D:/杨谊瑶/大三上/大数据技术/第三次上机/img_feature_clustering/files/DL_results/hybrid_features.csv")
