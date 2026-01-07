@@ -5,10 +5,6 @@ code/__pycache__/
 # 数据文件
 video/
 files/eda_stat_plots/
-files/Tradition_results/brand_cluster_distribution.csv
-files/DL_results/brand_cluster_distribution.csv
-files/Tradition_results/category_cluster_distribution.csv
-files/DL_results/category_cluster_distribution.csv
 files/Tradition_results/局部特征（SIFT）_cluster_comparison.png
 files/Tradition_results/纹理特征（LBP）_cluster_comparison.png
 files/Tradition_results/形状特征（HOG）_cluster_comparison.png
